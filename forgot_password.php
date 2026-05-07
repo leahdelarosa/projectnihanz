@@ -9,14 +9,12 @@ $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['send_email'])) {
         $email = sanitizeInput($_POST['email']);
-
         if (!validateEmail($email)) {
             $error = "Please enter a valid email address.";
         } else {
             $stmt = $pdo->prepare("SELECT id, security_question FROM users WHERE email = ?");
             $stmt->execute([$email]);
             $user = $stmt->fetch();
-
             if ($user) {
                 $_SESSION['reset_user_id'] = $user['id'];
                 $_SESSION['reset_security_question'] = $user['security_question'];
@@ -31,8 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = "Session expired. Please start again.";
             $step = 1;
         } else {
-            $security_answer = sanitizeInput($_POST['security_answer']);
-            $new_password = $_POST['new_password'];
+            $security_answer  = sanitizeInput($_POST['security_answer']);
+            $new_password     = $_POST['new_password'];
             $confirm_password = $_POST['confirm_password'];
 
             if (empty($security_answer) || empty($new_password) || empty($confirm_password)) {
@@ -44,19 +42,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $step = 2;
                 $security_question = $_SESSION['reset_security_question'] ?? '';
             } elseif (!validatePassword($new_password)) {
-                $error = "Password must be at least 8 characters with uppercase, lowercase, and number.";
+                $error = "Password must be at least 8 characters with uppercase, lowercase, and a number.";
                 $step = 2;
                 $security_question = $_SESSION['reset_security_question'] ?? '';
             } else {
                 $stmt = $pdo->prepare("SELECT security_answer FROM users WHERE id = ?");
                 $stmt->execute([$_SESSION['reset_user_id']]);
                 $stored_answer = $stmt->fetchColumn();
-
                 if ($stored_answer && verifyPassword($security_answer, $stored_answer)) {
                     $hashed_password = hashPassword($new_password);
                     $stmt = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
                     if ($stmt->execute([$hashed_password, $_SESSION['reset_user_id']])) {
-                        $success = "Your password has been reset successfully. You can now log in with your new password.";
+                        $success = "Password reset successfully. You can now sign in with your new password.";
                         logAudit($_SESSION['reset_user_id'], 'password_reset', 'success');
                         unset($_SESSION['reset_user_id'], $_SESSION['reset_security_question']);
                         $step = 1;
@@ -84,155 +81,332 @@ if ($step === 2 && empty($security_question)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forgot Password</title>
+    <title>SecureVault — Reset Password</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         :root {
-            --bg-start: #4f46e5;
-            --bg-end: #9333ea;
-            --panel: rgba(255, 255, 255, 0.96);
-            --text: #111827;
-            --muted: #6b7280;
-            --border: #e5e7eb;
-            --accent: #7c3aed;
-            --accent-hover: #6d28d9;
-            --success: #ecfdf5;
-            --success-text: #065f46;
-            --error: #fee2e2;
-            --error-text: #991b1b;
+            --bg:        #0a0e1a;
+            --surface:   #111827;
+            --surface2:  #1a2235;
+            --border:    rgba(99,179,237,0.12);
+            --accent:    #3b82f6;
+            --accent2:   #6366f1;
+            --glow:      rgba(59,130,246,0.22);
+            --text:      #f1f5f9;
+            --muted:     #94a3b8;
+            --danger-bg: rgba(239,68,68,0.1);
+            --success-bg:rgba(16,185,129,0.1);
         }
-        * {
-            box-sizing: border-box;
-        }
+
         body {
-            margin: 0;
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
-            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 24px;
-            color: var(--text);
+            position: relative;
+            overflow: hidden;
         }
-        .container {
-            width: min(100%, 520px);
-            padding: 36px 32px;
-            background: var(--panel);
-            border-radius: 32px;
-            box-shadow: 0 34px 100px rgba(15, 23, 42, 0.16);
-            border: 1px solid rgba(255,255,255,0.35);
-            backdrop-filter: blur(10px);
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
         }
+
+        .orb {
+            position: fixed;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(99,102,241,0.07) 0%, transparent 70%);
+            bottom: -200px; right: -200px;
+            pointer-events: none;
+            border-radius: 50%;
+        }
+
+        .card {
+            position: relative;
+            width: min(100%, 460px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 48px 40px;
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.03), 0 32px 80px rgba(0,0,0,0.5);
+            z-index: 1;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 36px;
+        }
+
+        .brand-icon {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 20px var(--glow);
+        }
+
+        .brand-icon svg { width: 22px; height: 22px; fill: white; }
+        .brand-name { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; }
+        .brand-name span { color: var(--accent); }
+
+        /* Step indicator */
+        .steps {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 32px;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .step-num {
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .step.done .step-num  { background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
+        .step.active .step-num{ background: rgba(59,130,246,0.15); color: var(--accent); border: 1px solid rgba(59,130,246,0.3); }
+        .step.idle .step-num  { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+
+        .step.done  .step-label { color: #6ee7b7; }
+        .step.active .step-label{ color: var(--text); }
+        .step.idle  .step-label { color: var(--muted); }
+
+        .step-connector {
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+            margin: 0 10px;
+        }
+
         h1 {
-            margin: 0;
-            font-size: clamp(2rem, 2.4vw, 2.6rem);
+            font-size: 1.6rem;
+            font-weight: 800;
             letter-spacing: -0.03em;
+            margin-bottom: 8px;
         }
-        .message {
-            border-radius: 18px;
-            padding: 16px 18px;
-            margin-bottom: 22px;
-            line-height: 1.5;
-            font-weight: 500;
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 0.875rem;
+            line-height: 1.6;
+            margin-bottom: 28px;
         }
-        .error {
-            background: var(--error);
-            color: var(--error-text);
+
+        .alert {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 13px 15px; border-radius: 11px;
+            font-size: 0.875rem; font-weight: 500;
+            margin-bottom: 22px; line-height: 1.5;
         }
-        .success {
-            background: var(--success);
-            color: var(--success-text);
-        }
-        form {
-            display: grid;
-            gap: 18px;
-        }
+
+        .alert svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 1px; }
+        .alert-error   { background: var(--danger-bg);  border: 1px solid rgba(239,68,68,0.25);  color: #fca5a5; }
+        .alert-success { background: var(--success-bg); border: 1px solid rgba(16,185,129,0.25); color: #6ee7b7; }
+
+        .field { margin-bottom: 18px; }
+
         label {
             display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
-            color: #334155;
+            font-size: 0.78rem; font-weight: 600;
+            letter-spacing: 0.05em; text-transform: uppercase;
+            color: var(--muted); margin-bottom: 7px;
         }
+
+        .input-wrap { position: relative; }
+
+        .input-wrap svg {
+            position: absolute; left: 13px; top: 50%;
+            transform: translateY(-50%);
+            width: 15px; height: 15px; color: #475569; pointer-events: none;
+        }
+
         input {
             width: 100%;
-            padding: 16px 18px;
+            padding: 12px 12px 12px 40px;
+            background: var(--surface2);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            background: #f8fafc;
+            border-radius: 11px;
             color: var(--text);
-            font-size: 1rem;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
+
+        input:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        input::placeholder { color: #334155; }
+
         input:focus {
             outline: none;
-            border-color: rgba(124, 58, 237, 0.4);
-            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
         }
-        button {
+
+        .btn {
             width: 100%;
-            border: none;
-            border-radius: 16px;
-            padding: 16px;
-            font-size: 1rem;
-            font-weight: 700;
-            color: white;
-            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-            cursor: pointer;
-            box-shadow: 0 12px 30px rgba(124, 58, 237, 0.2);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            padding: 13px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border: none; border-radius: 11px;
+            color: white; font-size: 0.9rem; font-weight: 700;
+            font-family: inherit; cursor: pointer;
+            transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 20px var(--glow);
+            margin-top: 4px;
         }
-        button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 18px 40px rgba(124, 58, 237, 0.24);
+
+        .btn:hover { opacity: 0.92; transform: translateY(-1px); box-shadow: 0 8px 28px var(--glow); }
+        .btn:active { transform: translateY(0); }
+
+        .divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+        .back-link {
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            color: var(--muted); font-size: 0.875rem; text-decoration: none;
+            transition: color 0.2s;
         }
-        .link {
-            text-align: center;
-            margin-top: 16px;
-            color: var(--muted);
+
+        .back-link svg { width: 13px; height: 13px; }
+        .back-link:hover { color: var(--accent); }
+
+        .security-badge {
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            margin-top: 24px; color: #334155; font-size: 0.75rem;
         }
-        .link a {
-            color: var(--accent);
-            font-weight: 600;
-            text-decoration: none;
-        }
-        .link a:hover {
-            text-decoration: underline;
-        }
+
+        .security-badge svg { width: 12px; height: 12px; }
+
+        @media (max-width: 480px) { .card { padding: 32px 24px; } }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Forgot Password</h1>
-        <p class="subtitle">Reset your password by answering your security question and setting a new one.</p>
-        <?php if ($error) echo "<div class='message error'>" . htmlspecialchars($error) . "</div>"; ?>
-        <?php if ($success) echo "<div class='message success'>" . htmlspecialchars($success) . "</div>"; ?>
+    <div class="orb"></div>
+    <div class="card">
+        <div class="brand">
+            <div class="brand-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+            </div>
+            <div class="brand-name">Secure<span>Vault</span></div>
+        </div>
+
+        <!-- Step indicator -->
+        <div class="steps">
+            <div class="step <?php echo $step >= 1 ? ($step > 1 ? 'done' : 'active') : 'idle'; ?>">
+                <div class="step-num"><?php echo $step > 1 ? '✓' : '1'; ?></div>
+                <span class="step-label">Verify Email</span>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step <?php echo $step >= 2 ? 'active' : 'idle'; ?>">
+                <div class="step-num">2</div>
+                <span class="step-label">Reset Password</span>
+            </div>
+        </div>
 
         <?php if ($step === 1): ?>
-            <form method="post">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" autocomplete="email" required>
-                <button type="submit" name="send_email">Continue</button>
-            </form>
+        <h1>Forgot password?</h1>
+        <p class="subtitle">Enter your email and we'll verify your identity using your security question.</p>
         <?php else: ?>
-            <form method="post">
-                <label>Security Question</label>
-                <input type="text" value="<?php echo htmlspecialchars($security_question); ?>" disabled>
-
-                <label for="security_answer">Security Answer</label>
-                <input type="password" id="security_answer" name="security_answer" autocomplete="off" required>
-
-                <label for="new_password">New Password</label>
-                <input type="password" id="new_password" name="new_password" autocomplete="new-password" required>
-
-                <label for="confirm_password">Confirm New Password</label>
-                <input type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" required>
-
-                <button type="submit" name="reset_password">Reset Password</button>
-            </form>
+        <h1>Reset password</h1>
+        <p class="subtitle">Answer your security question and choose a new strong password.</p>
         <?php endif; ?>
 
-        <div class="link">
-            <a href="login.php">Back to Login</a>
+        <?php if ($error): ?>
+        <div class="alert alert-error">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <?php echo htmlspecialchars($error); ?>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($success): ?>
+        <div class="alert alert-success">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            <?php echo htmlspecialchars($success); ?>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($step === 1): ?>
+        <form method="post">
+            <div class="field">
+                <label for="email">Email Address</label>
+                <div class="input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+                </div>
+            </div>
+            <button type="submit" name="send_email" class="btn">Continue</button>
+        </form>
+
+        <?php else: ?>
+        <form method="post">
+            <div class="field">
+                <label>Your Security Question</label>
+                <div class="input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    <input type="text" value="<?php echo htmlspecialchars($security_question); ?>" disabled>
+                </div>
+            </div>
+            <div class="field">
+                <label for="security_answer">Security Answer</label>
+                <div class="input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <input type="password" id="security_answer" name="security_answer" placeholder="Your answer" autocomplete="off" required>
+                </div>
+            </div>
+            <div class="field">
+                <label for="new_password">New Password</label>
+                <div class="input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <input type="password" id="new_password" name="new_password" placeholder="Min 8 chars, upper, lower, number" autocomplete="new-password" required>
+                </div>
+            </div>
+            <div class="field">
+                <label for="confirm_password">Confirm New Password</label>
+                <div class="input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Repeat new password" autocomplete="new-password" required>
+                </div>
+            </div>
+            <button type="submit" name="reset_password" class="btn">Reset Password</button>
+        </form>
+        <?php endif; ?>
+
+        <div class="divider"></div>
+
+        <a href="login.php" class="back-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+            Back to Sign In
+        </a>
+
+        <div class="security-badge">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+            Identity verified via security question
         </div>
     </div>
 </body>
