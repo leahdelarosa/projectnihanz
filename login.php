@@ -33,11 +33,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SecureVault — Login</title>
     <style>
+        /* ============================================
+           FONTS
+           ============================================ */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
+        /* ============================================
+           RESET & BASE STYLES
+           ============================================ */
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+        /* ============================================
+           DESIGN TOKENS
+           ============================================ */
         :root {
+            /* Colors */
             --bg:        #0a0e1a;
             --surface:   #111827;
             --surface2:  #1a2235;
@@ -54,6 +64,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             --success-bg:rgba(16,185,129,0.1);
         }
 
+        /* ============================================
+           LAYOUT
+           ============================================ */
         body {
             font-family: 'Inter', system-ui, sans-serif;
             background: var(--bg);
@@ -67,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             overflow: hidden;
         }
 
-        /* Animated background grid */
+        /* Background grid pattern */
         body::before {
             content: '';
             position: fixed;
@@ -79,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             pointer-events: none;
         }
 
-        /* Glow orbs */
+        /* Decorative glow orbs */
         body::after {
             content: '';
             position: fixed;
@@ -98,6 +111,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             border-radius: 50%;
         }
 
+        /* ============================================
+           COMPONENTS - Card
+           ============================================ */
         .card {
             position: relative;
             width: min(100%, 460px);
@@ -107,8 +123,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             padding: 48px 40px;
             box-shadow: 0 0 0 1px rgba(255,255,255,0.03), 0 32px 80px rgba(0,0,0,0.5);
             z-index: 1;
+            animation: fadeIn 0.4s ease;
         }
 
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ============================================
+           COMPONENTS - Brand
+           ============================================ */
         .brand {
             display: flex;
             align-items: center;
@@ -136,6 +167,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         .brand-name span { color: var(--accent); }
 
+        /* ============================================
+           COMPONENTS - Typography
+           ============================================ */
         h1 {
             font-size: 1.75rem;
             font-weight: 800;
@@ -151,6 +185,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             margin-bottom: 32px;
         }
 
+        /* ============================================
+           COMPONENTS - Alerts
+           ============================================ */
         .alert {
             display: flex;
             align-items: flex-start;
@@ -162,6 +199,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             margin-bottom: 24px;
             line-height: 1.5;
         }
+
+        .alert svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
 
         .alert-error {
             background: var(--danger-bg);
@@ -175,8 +214,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             color: #6ee7b7;
         }
 
-        .alert svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
-
+        /* ============================================
+           COMPONENTS - Forms
+           ============================================ */
         .field { margin-bottom: 20px; }
 
         label {
@@ -223,6 +263,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
         }
 
+        /* ============================================
+           COMPONENTS - Buttons
+           ============================================ */
         .btn {
             width: 100%;
             padding: 14px;
@@ -238,6 +281,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             box-shadow: 0 4px 20px var(--glow);
             margin-top: 8px;
             letter-spacing: 0.01em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn svg {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
         }
 
         .btn:hover {
@@ -248,6 +301,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         .btn:active { transform: translateY(0); }
 
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-loading {
+            position: relative;
+            color: transparent;
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ============================================
+           UTILITIES
+           ============================================ */
         .divider {
             height: 1px;
             background: var(--border);
@@ -283,6 +369,47 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         .security-badge svg { width: 12px; height: 12px; }
+
+        /* ============================================
+           RESPONSIVE DESIGN
+           ============================================ */
+        /* Tablet: 560px - 899px */
+        @media (max-width: 899px) and (min-width: 560px) {
+            body { padding: 20px; }
+            .card { padding: 40px 32px; }
+        }
+
+        /* Mobile: < 560px */
+        @media (max-width: 560px) {
+            body { padding: 16px; }
+            .card { 
+                padding: 32px 24px; 
+                border-radius: 20px;
+            }
+            h1 { font-size: 1.5rem; }
+            .subtitle { font-size: 0.85rem; }
+            .brand { margin-bottom: 28px; }
+            .brand-icon { width: 40px; height: 40px; }
+            .brand-icon svg { width: 20px; height: 20px; }
+            .brand-name { font-size: 1rem; }
+            
+            /* Ensure minimum touch target sizes (44x44px) */
+            input { 
+                padding: 15px 14px 15px 42px; 
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+            .btn { 
+                padding: 16px; 
+                font-size: 1rem;
+                min-height: 44px;
+            }
+            
+            /* Adjust font sizes for mobile readability */
+            label { font-size: 0.75rem; }
+            .alert { font-size: 0.8rem; padding: 12px 14px; }
+            .links a { font-size: 0.8rem; }
+            .security-badge { font-size: 0.7rem; margin-top: 24px; }
+        }
     </style>
 </head>
 <body>
@@ -338,8 +465,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
             </div>
 
-            <button type="submit" class="btn">Sign In</button>
+            <button type="submit" class="btn" id="submitBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                Sign In
+            </button>
         </form>
+
+        <script>
+            document.querySelector('form').addEventListener('submit', function(e) {
+                const btn = document.getElementById('submitBtn');
+                btn.disabled = true;
+                btn.classList.add('btn-loading');
+                btn.textContent = 'Signing in...';
+            });
+        </script>
 
         <div class="divider"></div>
 

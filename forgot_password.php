@@ -92,12 +92,15 @@ if ($step === 2 && empty($security_question)) {
             --surface:   #111827;
             --surface2:  #1a2235;
             --border:    rgba(99,179,237,0.12);
+            --border-hi: rgba(99,179,237,0.35);
             --accent:    #3b82f6;
             --accent2:   #6366f1;
-            --glow:      rgba(59,130,246,0.22);
+            --glow:      rgba(59,130,246,0.25);
             --text:      #f1f5f9;
             --muted:     #94a3b8;
+            --danger:    #ef4444;
             --danger-bg: rgba(239,68,68,0.1);
+            --success:   #10b981;
             --success-bg:rgba(16,185,129,0.1);
         }
 
@@ -125,11 +128,21 @@ if ($step === 2 && empty($security_question)) {
             pointer-events: none;
         }
 
-        .orb {
+        /* Glow orbs */
+        body::after {
+            content: '';
             position: fixed;
             width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%);
+            top: -200px; left: -200px;
+            pointer-events: none;
+        }
+
+        .orb2 {
+            position: fixed;
+            width: 500px; height: 500px;
             background: radial-gradient(circle, rgba(99,102,241,0.07) 0%, transparent 70%);
-            bottom: -200px; right: -200px;
+            bottom: -150px; right: -150px;
             pointer-events: none;
             border-radius: 50%;
         }
@@ -158,10 +171,11 @@ if ($step === 2 && empty($security_question)) {
             border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 0 20px var(--glow);
+            flex-shrink: 0;
         }
 
         .brand-icon svg { width: 22px; height: 22px; fill: white; }
-        .brand-name { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; }
+        .brand-name { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
         .brand-name span { color: var(--accent); }
 
         /* Step indicator */
@@ -204,55 +218,56 @@ if ($step === 2 && empty($security_question)) {
         }
 
         h1 {
-            font-size: 1.6rem;
+            font-size: 1.75rem;
             font-weight: 800;
             letter-spacing: -0.03em;
+            line-height: 1.1;
             margin-bottom: 8px;
         }
 
         .subtitle {
             color: var(--muted);
-            font-size: 0.875rem;
+            font-size: 0.9rem;
             line-height: 1.6;
-            margin-bottom: 28px;
+            margin-bottom: 32px;
         }
 
         .alert {
             display: flex; align-items: flex-start; gap: 10px;
-            padding: 13px 15px; border-radius: 11px;
+            padding: 14px 16px; border-radius: 12px;
             font-size: 0.875rem; font-weight: 500;
-            margin-bottom: 22px; line-height: 1.5;
+            margin-bottom: 24px; line-height: 1.5;
         }
 
-        .alert svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 1px; }
+        .alert svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
         .alert-error   { background: var(--danger-bg);  border: 1px solid rgba(239,68,68,0.25);  color: #fca5a5; }
         .alert-success { background: var(--success-bg); border: 1px solid rgba(16,185,129,0.25); color: #6ee7b7; }
 
-        .field { margin-bottom: 18px; }
+        .field { margin-bottom: 20px; }
 
         label {
             display: block;
-            font-size: 0.78rem; font-weight: 600;
-            letter-spacing: 0.05em; text-transform: uppercase;
-            color: var(--muted); margin-bottom: 7px;
+            font-size: 0.8rem; font-weight: 600;
+            letter-spacing: 0.06em; text-transform: uppercase;
+            color: var(--muted); margin-bottom: 8px;
         }
 
         .input-wrap { position: relative; }
 
         .input-wrap svg {
-            position: absolute; left: 13px; top: 50%;
+            position: absolute; left: 14px; top: 50%;
             transform: translateY(-50%);
-            width: 15px; height: 15px; color: #475569; pointer-events: none;
+            width: 16px; height: 16px; color: var(--muted); pointer-events: none;
         }
 
         input {
             width: 100%;
-            padding: 12px 12px 12px 40px;
+            padding: 13px 14px 13px 42px;
             background: var(--surface2);
             border: 1px solid var(--border);
-            border-radius: 11px;
+            border-radius: 12px;
             color: var(--text);
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             font-family: inherit;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
@@ -262,30 +277,86 @@ if ($step === 2 && empty($security_question)) {
             cursor: not-allowed;
         }
 
-        input::placeholder { color: #334155; }
+        input::placeholder { color: #475569; }
 
         input:focus {
             outline: none;
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
         }
 
         .btn {
             width: 100%;
-            padding: 13px;
+            padding: 14px;
             background: linear-gradient(135deg, var(--accent), var(--accent2));
-            border: none; border-radius: 11px;
-            color: white; font-size: 0.9rem; font-weight: 700;
+            border: none; border-radius: 12px;
+            color: white; font-size: 0.95rem; font-weight: 700;
             font-family: inherit; cursor: pointer;
             transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
             box-shadow: 0 4px 20px var(--glow);
-            margin-top: 4px;
+            margin-top: 8px;
+            letter-spacing: 0.01em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
 
-        .btn:hover { opacity: 0.92; transform: translateY(-1px); box-shadow: 0 8px 28px var(--glow); }
+        .btn svg {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+        }
+
+        .btn:hover { opacity: 0.92; transform: translateY(-1px); box-shadow: 0 8px 30px var(--glow); }
         .btn:active { transform: translateY(0); }
 
-        .divider { height: 1px; background: var(--border); margin: 24px 0; }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-loading {
+            position: relative;
+            color: transparent;
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .card {
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .divider { height: 1px; background: var(--border); margin: 28px 0; }
 
         .back-link {
             display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -298,16 +369,67 @@ if ($step === 2 && empty($security_question)) {
 
         .security-badge {
             display: flex; align-items: center; justify-content: center; gap: 6px;
-            margin-top: 24px; color: #334155; font-size: 0.75rem;
+            margin-top: 28px; color: #334155; font-size: 0.75rem;
         }
 
         .security-badge svg { width: 12px; height: 12px; }
 
-        @media (max-width: 480px) { .card { padding: 32px 24px; } }
+        /* Responsive Design */
+        /* Tablet: 560px - 899px */
+        @media (max-width: 899px) and (min-width: 560px) {
+            body { padding: 20px; }
+            .card { padding: 40px 32px; }
+        }
+
+        /* Mobile: < 560px */
+        @media (max-width: 560px) {
+            body { padding: 16px; }
+            .card { 
+                padding: 32px 24px; 
+                border-radius: 20px;
+            }
+            
+            h1 { font-size: 1.5rem; }
+            .subtitle { font-size: 0.85rem; }
+            .brand { margin-bottom: 28px; }
+            .brand-icon { width: 40px; height: 40px; }
+            .brand-icon svg { width: 20px; height: 20px; }
+            .brand-name { font-size: 1rem; }
+            
+            /* Step indicator adjustments */
+            .steps { margin-bottom: 28px; gap: 0; }
+            .step { font-size: 0.7rem; }
+            .step-num { width: 22px; height: 22px; font-size: 0.65rem; }
+            .step-label { display: none; } /* Hide labels on very small screens */
+            .step-connector { margin: 0 8px; }
+            
+            /* Ensure minimum touch target sizes (44x44px) */
+            input { 
+                padding: 15px 14px 15px 42px; 
+                font-size: 16px; /* Prevents zoom on iOS */
+                min-height: 44px;
+            }
+            
+            .btn { 
+                padding: 16px; 
+                font-size: 1rem;
+                min-height: 44px;
+            }
+            
+            /* Adjust font sizes for mobile readability */
+            label { font-size: 0.75rem; }
+            .alert { font-size: 0.8rem; padding: 12px 14px; }
+            .back-link { font-size: 0.8rem; }
+            .security-badge { font-size: 0.7rem; margin-top: 24px; }
+        }
+
+        @media (max-width: 480px) { 
+            .card { padding: 28px 20px; }
+        }
     </style>
 </head>
 <body>
-    <div class="orb"></div>
+    <div class="orb2"></div>
     <div class="card">
         <div class="brand">
             <div class="brand-icon">
@@ -360,7 +482,10 @@ if ($step === 2 && empty($security_question)) {
                     <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required>
                 </div>
             </div>
-            <button type="submit" name="send_email" class="btn">Continue</button>
+            <button type="submit" name="send_email" class="btn" id="continueBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                Continue
+            </button>
         </form>
 
         <?php else: ?>
@@ -393,7 +518,10 @@ if ($step === 2 && empty($security_question)) {
                     <input type="password" id="confirm_password" name="confirm_password" placeholder="Repeat new password" autocomplete="new-password" required>
                 </div>
             </div>
-            <button type="submit" name="reset_password" class="btn">Reset Password</button>
+            <button type="submit" name="reset_password" class="btn" id="resetBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Reset Password
+            </button>
         </form>
         <?php endif; ?>
 
@@ -409,5 +537,26 @@ if ($step === 2 && empty($security_question)) {
             Identity verified via security question
         </div>
     </div>
+
+    <script>
+        // Form submission loading states
+        const forms = document.querySelectorAll('form');
+        forms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('btn-loading');
+                    
+                    // Update button text based on which form
+                    if (submitBtn.name === 'send_email') {
+                        submitBtn.textContent = 'Verifying...';
+                    } else if (submitBtn.name === 'reset_password') {
+                        submitBtn.textContent = 'Resetting...';
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>

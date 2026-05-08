@@ -3,6 +3,8 @@ require 'config.php';
 requireLogin();
 
 $user_id = $_SESSION['user_id'];
+$success = null;
+$error = null;
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['update'])) {
@@ -10,6 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt = $pdo->prepare("SELECT security_answer FROM users WHERE id = ?");
         $stmt->execute([$user_id]);
         $stored_answer = $stmt->fetch()['security_answer'];
+        
         if (verifyPassword($security_answer, $stored_answer)) {
             $full_name      = sanitizeInput($_POST['full_name']);
             $email          = sanitizeInput($_POST['email']);
@@ -65,6 +68,20 @@ $decrypted_birthdate= decryptData($user['birthdate']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SecureVault — Profile</title>
+    <?php if (isset($success)): ?>
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            alert('✅ SUCCESS: <?php echo addslashes($success); ?>');
+        });
+    </script>
+    <?php endif; ?>
+    <?php if (isset($error)): ?>
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            alert('❌ ERROR: <?php echo addslashes($error); ?>');
+        });
+    </script>
+    <?php endif; ?>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
@@ -302,6 +319,16 @@ $decrypted_birthdate= decryptData($user['birthdate']);
             font-family: inherit; cursor: pointer;
             transition: opacity 0.2s, transform 0.15s;
             margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn svg {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
         }
 
         .btn-primary {
@@ -320,6 +347,51 @@ $decrypted_birthdate= decryptData($user['birthdate']);
 
         .btn-danger:hover { background: rgba(239,68,68,0.18); }
 
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-loading {
+            position: relative;
+            color: transparent;
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            top: 50%;
+            left: 50%;
+            margin-left: -7px;
+            margin-top: -7px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .main {
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .danger-warning {
             background: rgba(239,68,68,0.06);
             border: 1px solid rgba(239,68,68,0.15);
@@ -331,9 +403,176 @@ $decrypted_birthdate= decryptData($user['birthdate']);
             line-height: 1.6;
         }
 
-        @media (max-width: 1100px) { .layout { grid-template-columns: 1fr; } }
-        @media (max-width: 900px)  { .sidebar { display: none; } .main { margin-left: 0; padding: 24px; } }
-        @media (max-width: 560px)  { .grid-2 { grid-template-columns: 1fr; } }
+        .encrypted-field { position: relative; }
+
+        .encryption-badge {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            background: rgba(59,130,246,0.12);
+            border: 1px solid rgba(59,130,246,0.2);
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--accent);
+            cursor: help;
+            z-index: 1;
+        }
+
+        .encryption-badge svg {
+            width: 11px;
+            height: 11px;
+            flex-shrink: 0;
+        }
+
+        .textarea-wrap .encryption-badge {
+            top: 14px;
+            transform: none;
+        }
+
+        .tooltip {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            right: 0;
+            background: var(--surface2);
+            border: 1px solid var(--border-hi);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.7rem;
+            color: var(--text);
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            right: 12px;
+            border: 5px solid transparent;
+            border-top-color: var(--border-hi);
+        }
+
+        .encryption-badge:hover .tooltip {
+            opacity: 1;
+        }
+
+        /* Responsive Design */
+        /* Large tablet: < 1100px */
+        @media (max-width: 1100px) { 
+            .layout { 
+                grid-template-columns: 1fr; 
+            }
+        }
+        
+        /* Tablet: 560px - 899px */
+        @media (max-width: 899px) and (min-width: 560px) {
+            .sidebar { display: none; }
+            .main { margin-left: 0; padding: 32px; }
+            
+            .layout { grid-template-columns: 1fr; }
+            
+            .grid-2 { gap: 14px; }
+            
+            .topbar { margin-bottom: 28px; }
+            .page-title { font-size: 1.35rem; }
+        }
+        
+        /* Mobile: < 560px */
+        @media (max-width: 560px) { 
+            .sidebar { display: none; }
+            .main { margin-left: 0; padding: 20px 16px; }
+            
+            /* Stack layout vertically */
+            .layout { 
+                grid-template-columns: 1fr; 
+                gap: 16px;
+            }
+            
+            /* Stack form fields vertically */
+            .grid-2 { 
+                grid-template-columns: 1fr; 
+                gap: 16px;
+            }
+            
+            .panel { 
+                padding: 20px; 
+                border-radius: 16px;
+            }
+            
+            .panel-header { 
+                padding-bottom: 14px; 
+                margin-bottom: 18px;
+            }
+            
+            .panel-icon { 
+                width: 38px; 
+                height: 38px; 
+            }
+            
+            .panel-icon svg { width: 16px; height: 16px; }
+            .panel-title { font-size: 1rem; }
+            .panel-subtitle { font-size: 0.8rem; }
+            
+            /* Ensure minimum touch target sizes (44x44px) */
+            input, select, textarea { 
+                padding: 15px 14px; 
+                font-size: 16px; /* Prevents zoom on iOS */
+                min-height: 44px;
+            }
+            
+            .input-wrap input { padding-left: 42px; }
+            
+            .btn { 
+                padding: 16px; 
+                font-size: 1rem;
+                min-height: 44px;
+            }
+            
+            .btn-danger { 
+                min-height: 44px;
+                padding: 16px;
+            }
+            
+            /* Topbar adjustments */
+            .topbar { 
+                flex-direction: column; 
+                align-items: flex-start; 
+                gap: 12px;
+                margin-bottom: 24px;
+            }
+            
+            .page-title { font-size: 1.25rem; }
+            
+            .back-btn { 
+                min-height: 44px;
+                padding: 12px 16px;
+            }
+            
+            /* Adjust font sizes for mobile readability */
+            label { font-size: 0.75rem; }
+            .alert { font-size: 0.8rem; padding: 12px 14px; }
+            .encryption-badge { 
+                width: 20px; 
+                height: 20px; 
+            }
+            .encryption-badge svg { 
+                width: 10px; 
+                height: 10px; 
+            }
+            .tooltip { font-size: 0.7rem; }
+            .danger-zone-header { font-size: 0.95rem; }
+            .danger-zone p { font-size: 0.8rem; }
+        }
     </style>
 </head>
 <body>
@@ -417,25 +656,40 @@ $decrypted_birthdate= decryptData($user['birthdate']);
                                     <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" required>
                                 </div>
                             </div>
-                            <div class="field">
+                            <div class="field encrypted-field">
                                 <label for="contact_number">Phone Number</label>
                                 <div class="input-wrap">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                                    <input type="text" id="contact_number" name="contact_number" value="<?php echo htmlspecialchars($decrypted_contact); ?>" required>
+                                    <input type="text" id="contact_number" name="contact_number" value="<?php echo htmlspecialchars($decrypted_contact); ?>" required style="padding-right: 90px;">
+                                    <div class="encryption-badge">
+                                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+                                        AES-256
+                                        <span class="tooltip">Encrypted with AES-256 before storage</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="field">
+                            <div class="field encrypted-field">
                                 <label for="birthdate">Date of Birth</label>
                                 <div class="input-wrap">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                    <input type="date" id="birthdate" name="birthdate" value="<?php echo htmlspecialchars($decrypted_birthdate); ?>" required>
+                                    <input type="date" id="birthdate" name="birthdate" value="<?php echo htmlspecialchars($decrypted_birthdate); ?>" required style="padding-right: 90px;">
+                                    <div class="encryption-badge">
+                                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+                                        AES-256
+                                        <span class="tooltip">Encrypted with AES-256 before storage</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="field full">
+                            <div class="field full encrypted-field">
                                 <label for="address">Address</label>
                                 <div class="input-wrap textarea-wrap">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                                    <textarea id="address" name="address" required><?php echo htmlspecialchars($decrypted_address); ?></textarea>
+                                    <textarea id="address" name="address" required style="padding-right: 90px;"><?php echo htmlspecialchars($decrypted_address); ?></textarea>
+                                    <div class="encryption-badge">
+                                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+                                        AES-256
+                                        <span class="tooltip">Encrypted with AES-256 before storage</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -453,7 +707,12 @@ $decrypted_birthdate= decryptData($user['birthdate']);
                             </div>
                         </div>
 
-                        <button type="submit" name="update" class="btn btn-primary">Save Changes</button>
+                        <button type="submit" name="update" value="1" class="btn btn-primary" id="updateBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                            Save Changes
+                        </button>
+                        <!-- Backup hidden input for browser compatibility -->
+                        <input type="hidden" name="update" value="1">
                     </form>
                 </div>
             </div>
@@ -481,11 +740,37 @@ $decrypted_birthdate= decryptData($user['birthdate']);
                                 <input type="password" id="security_answer_delete" name="security_answer_delete" placeholder="Your security answer" required>
                             </div>
                         </div>
-                        <button type="submit" name="delete" class="btn btn-danger">Delete My Account</button>
+                        <button type="submit" name="delete" class="btn btn-danger" id="deleteBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                            Delete My Account
+                        </button>
                     </form>
                 </div>
             </div>
         </div>
     </main>
+
+    <script>
+        // Update form loading state
+        document.querySelector('form[method="post"]').addEventListener('submit', function(e) {
+            if (e.submitter && e.submitter.name === 'update') {
+                const btn = document.getElementById('updateBtn');
+                btn.disabled = true;
+                btn.classList.add('btn-loading');
+                btn.textContent = 'Saving...';
+            }
+        });
+
+        // Delete form loading state
+        const deleteForms = document.querySelectorAll('form[method="post"]');
+        if (deleteForms.length > 1) {
+            deleteForms[1].addEventListener('submit', function(e) {
+                const btn = document.getElementById('deleteBtn');
+                btn.disabled = true;
+                btn.classList.add('btn-loading');
+                btn.textContent = 'Deleting...';
+            });
+        }
+    </script>
 </body>
 </html>

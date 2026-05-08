@@ -142,7 +142,24 @@ $failed  = count(array_filter($logs, fn($l) => $l['status'] === 'failed'));
         .user-role { font-size: 0.7rem; color: var(--muted); }
 
         /* Main */
-        .main { margin-left: 240px; padding: 40px; position: relative; z-index: 1; }
+        .main { 
+            margin-left: 240px; 
+            padding: 40px; 
+            position: relative; 
+            z-index: 1;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
         .topbar {
             display: flex;
@@ -337,10 +354,127 @@ $failed  = count(array_filter($logs, fn($l) => $l['status'] === 'failed'));
 
         .empty-state svg { width: 40px; height: 40px; margin-bottom: 12px; opacity: 0.3; }
 
-        @media (max-width: 900px) {
+        /* Responsive Design */
+        /* Tablet: 560px - 899px */
+        @media (max-width: 899px) and (min-width: 560px) {
             .sidebar { display: none; }
-            .main { margin-left: 0; padding: 24px; }
-            .stats { grid-template-columns: 1fr; }
+            .main { margin-left: 0; padding: 32px; }
+            
+            .stats { 
+                grid-template-columns: repeat(2, 1fr); 
+                gap: 14px;
+            }
+            
+            .topbar { margin-bottom: 28px; }
+            .page-title { font-size: 1.35rem; }
+            
+            /* Table adjustments */
+            .table-container { 
+                overflow-x: auto; 
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* Mobile: < 560px */
+        @media (max-width: 560px) {
+            .sidebar { display: none; }
+            .main { margin-left: 0; padding: 20px 16px; }
+            
+            /* Stack stat cards vertically */
+            .stats { 
+                grid-template-columns: 1fr; 
+                gap: 12px;
+                margin-bottom: 24px;
+            }
+            
+            .stat-card { 
+                padding: 16px 18px; 
+            }
+            
+            .stat-icon { 
+                width: 38px; 
+                height: 38px; 
+            }
+            
+            .stat-icon svg { width: 16px; height: 16px; }
+            .stat-label { font-size: 0.7rem; }
+            .stat-value { font-size: 0.95rem; }
+            
+            /* Topbar adjustments */
+            .topbar { 
+                flex-direction: column; 
+                align-items: flex-start; 
+                gap: 16px;
+                margin-bottom: 24px;
+            }
+            
+            .page-title { font-size: 1.25rem; }
+            
+            .back-btn { 
+                align-self: stretch;
+                justify-content: center;
+                min-height: 44px;
+                padding: 12px 16px;
+            }
+            
+            /* Filter adjustments */
+            .filter-bar { 
+                padding: 16px; 
+                border-radius: 14px;
+                margin-bottom: 16px;
+            }
+            
+            .filter-input { 
+                padding: 14px 14px 14px 40px; 
+                font-size: 16px; /* Prevents zoom on iOS */
+                min-height: 44px;
+            }
+            
+            /* Table adjustments for mobile */
+            .table-container { 
+                overflow-x: auto; 
+                -webkit-overflow-scrolling: touch;
+                border-radius: 14px;
+            }
+            
+            .audit-table { 
+                font-size: 0.8rem; 
+            }
+            
+            .audit-table th { 
+                padding: 12px 10px; 
+                font-size: 0.7rem;
+            }
+            
+            .audit-table td { 
+                padding: 12px 10px; 
+            }
+            
+            /* Badge adjustments */
+            .badge { 
+                font-size: 0.65rem; 
+                padding: 3px 7px; 
+            }
+            
+            /* Status icon adjustments */
+            .status-icon { 
+                width: 16px; 
+                height: 16px; 
+            }
+            
+            /* Adjust font sizes for mobile readability */
+            .empty-state { 
+                padding: 48px 20px; 
+            }
+            
+            .empty-state svg { 
+                width: 32px; 
+                height: 32px; 
+            }
+            
+            .empty-state p { 
+                font-size: 0.85rem; 
+            }
         }
     </style>
 </head>

@@ -60,13 +60,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             --surface:   #111827;
             --surface2:  #1a2235;
             --border:    rgba(99,179,237,0.12);
+            --border-hi: rgba(99,179,237,0.35);
             --accent:    #3b82f6;
             --accent2:   #6366f1;
-            --glow:      rgba(59,130,246,0.22);
+            --glow:      rgba(59,130,246,0.25);
             --text:      #f1f5f9;
             --muted:     #94a3b8;
             --danger:    #ef4444;
             --danger-bg: rgba(239,68,68,0.1);
+            --success:   #10b981;
+            --success-bg:rgba(16,185,129,0.1);
         }
 
         body {
@@ -82,6 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             overflow-x: hidden;
         }
 
+        /* Animated background grid */
         body::before {
             content: '';
             position: fixed;
@@ -93,11 +97,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             pointer-events: none;
         }
 
-        .orb1 {
+        /* Glow orbs */
+        body::after {
+            content: '';
             position: fixed;
-            width: 700px; height: 700px;
-            background: radial-gradient(circle, rgba(59,130,246,0.07) 0%, transparent 70%);
-            top: -300px; right: -200px;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%);
+            top: -200px; left: -200px;
+            pointer-events: none;
+        }
+
+        .orb2 {
+            position: fixed;
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(99,102,241,0.07) 0%, transparent 70%);
+            bottom: -150px; right: -150px;
             pointer-events: none;
             border-radius: 50%;
         }
@@ -135,6 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             font-size: 1.1rem;
             font-weight: 700;
             letter-spacing: -0.02em;
+            color: var(--text);
         }
 
         .brand-name span { color: var(--accent); }
@@ -143,6 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             font-size: 1.75rem;
             font-weight: 800;
             letter-spacing: -0.03em;
+            line-height: 1.1;
             margin-bottom: 8px;
         }
 
@@ -160,13 +176,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             border-radius: 12px;
             padding: 14px 16px;
             font-size: 0.875rem;
+            font-weight: 500;
             margin-bottom: 24px;
+            line-height: 1.5;
         }
 
         .alert-error ul {
             padding-left: 18px;
             margin: 0;
             line-height: 1.8;
+        }
+
+        .alert-success {
+            background: var(--success-bg);
+            border: 1px solid rgba(16,185,129,0.25);
+            color: #6ee7b7;
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 24px;
+            line-height: 1.5;
         }
 
         .section-label {
@@ -199,23 +229,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         label {
             display: block;
-            font-size: 0.78rem;
+            font-size: 0.8rem;
             font-weight: 600;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.06em;
             text-transform: uppercase;
             color: var(--muted);
-            margin-bottom: 7px;
+            margin-bottom: 8px;
         }
 
         .input-wrap { position: relative; }
 
         .input-wrap svg {
             position: absolute;
-            left: 13px;
+            left: 14px;
             top: 50%;
             transform: translateY(-50%);
-            width: 15px; height: 15px;
-            color: #475569;
+            width: 16px; height: 16px;
+            color: var(--muted);
             pointer-events: none;
         }
 
@@ -223,12 +253,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         input, textarea, select {
             width: 100%;
-            padding: 12px 12px 12px 40px;
+            padding: 13px 14px 13px 42px;
             background: var(--surface2);
             border: 1px solid var(--border);
-            border-radius: 11px;
+            border-radius: 12px;
             color: var(--text);
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             font-family: inherit;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
@@ -236,20 +266,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         textarea {
             resize: vertical;
             min-height: 90px;
-            padding-top: 12px;
+            padding-top: 13px;
         }
 
-        input::placeholder, textarea::placeholder { color: #334155; }
+        input::placeholder, textarea::placeholder { color: #475569; }
 
         input:focus, textarea:focus, select:focus {
             outline: none;
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
         }
 
-        /* Password strength */
+        /* Password strength meter */
         .strength-bar {
-            height: 3px;
+            height: 4px;
             border-radius: 2px;
             background: #1e293b;
             margin-top: 8px;
@@ -260,13 +290,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             height: 100%;
             border-radius: 2px;
             width: 0%;
-            transition: width 0.3s, background 0.3s;
+            transition: width 0.3s ease, background 0.3s ease;
         }
 
         .strength-text {
             font-size: 0.75rem;
-            color: var(--muted);
-            margin-top: 4px;
+            margin-top: 6px;
+            font-weight: 500;
         }
 
         .btn {
@@ -284,10 +314,70 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             box-shadow: 0 4px 20px var(--glow);
             margin-top: 24px;
             letter-spacing: 0.01em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
 
-        .btn:hover { opacity: 0.92; transform: translateY(-1px); box-shadow: 0 8px 30px var(--glow); }
+        .btn svg {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+        }
+
+        .btn:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 30px var(--glow);
+        }
+
         .btn:active { transform: translateY(0); }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-loading {
+            position: relative;
+            color: transparent;
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .card {
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
         .divider { height: 1px; background: var(--border); margin: 28px 0; }
 
@@ -297,7 +387,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             font-size: 0.875rem;
         }
 
-        .login-link a { color: var(--accent); font-weight: 600; text-decoration: none; }
+        .login-link a { color: var(--accent); font-weight: 600; text-decoration: none; transition: color 0.2s; }
         .login-link a:hover { text-decoration: underline; }
 
         .security-badge {
@@ -312,18 +402,70 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         .security-badge svg { width: 12px; height: 12px; }
 
-        @media (max-width: 520px) {
-            .card { padding: 32px 24px; }
-            .grid-2 { grid-template-columns: 1fr; }
+        /* Responsive Design */
+        /* Tablet: 560px - 899px */
+        @media (max-width: 899px) and (min-width: 560px) {
+            body { padding: 32px 20px; }
+            .card { padding: 40px 32px; }
+            .grid-2 { gap: 14px; }
+        }
+
+        /* Mobile: < 560px */
+        @media (max-width: 560px) {
+            body { padding: 24px 16px; }
+            .card { 
+                padding: 32px 24px; 
+                border-radius: 20px;
+            }
+            
+            /* Stack form fields vertically */
+            .grid-2 { 
+                grid-template-columns: 1fr; 
+                gap: 16px;
+            }
+            
+            h1 { font-size: 1.5rem; }
+            .subtitle { font-size: 0.85rem; }
+            .brand { margin-bottom: 28px; }
+            .brand-icon { width: 40px; height: 40px; }
+            .brand-icon svg { width: 20px; height: 20px; }
+            .brand-name { font-size: 1rem; }
+            
+            /* Ensure minimum touch target sizes (44x44px) */
+            input, select { 
+                padding: 15px 14px 15px 42px; 
+                font-size: 16px; /* Prevents zoom on iOS */
+                min-height: 44px;
+            }
+            
+            select { padding-left: 42px; }
+            
+            .btn { 
+                padding: 16px; 
+                font-size: 1rem;
+                min-height: 44px;
+            }
+            
+            /* Adjust font sizes for mobile readability */
+            label { font-size: 0.75rem; }
+            .alert { font-size: 0.8rem; padding: 12px 14px; }
+            .links a { font-size: 0.8rem; }
+            .security-badge { font-size: 0.7rem; margin-top: 24px; }
+            
+            /* Password strength meter adjustments */
+            .strength-meter { margin-top: 10px; }
+            .strength-label { font-size: 0.75rem; }
         }
     </style>
 </head>
 <body>
-    <div class="orb1"></div>
+    <div class="orb2"></div>
     <div class="card">
         <div class="brand">
             <div class="brand-icon">
-                <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                </svg>
             </div>
             <div class="brand-name">Secure<span>Vault</span></div>
         </div>
@@ -411,7 +553,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
             </div>
 
-            <button type="submit" class="btn">Create Secure Account</button>
+            <button type="submit" class="btn" id="submitBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Create Secure Account
+            </button>
         </form>
 
         <div class="divider"></div>
@@ -430,13 +575,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         function checkStrength(val) {
             const fill = document.getElementById('strengthFill');
             const text = document.getElementById('strengthText');
+            
+            if (!fill || !text) return;
+            
             let score = 0;
+            
+            // Calculate strength score
             if (val.length >= 8) score++;
             if (/[A-Z]/.test(val)) score++;
             if (/[a-z]/.test(val)) score++;
             if (/\d/.test(val)) score++;
             if (/[^A-Za-z0-9]/.test(val)) score++;
 
+            // Define strength levels with colors matching design system
             const levels = [
                 { w: '0%',   c: '#ef4444', t: 'Too short' },
                 { w: '25%',  c: '#ef4444', t: 'Weak' },
@@ -444,12 +595,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 { w: '75%',  c: '#3b82f6', t: 'Good' },
                 { w: '100%', c: '#10b981', t: 'Strong' },
             ];
-            const l = levels[score] || levels[0];
-            fill.style.width = l.w;
-            fill.style.background = l.c;
-            text.textContent = l.t;
-            text.style.color = l.c;
+            
+            const level = levels[score] || levels[0];
+            
+            // Apply styles with smooth transitions
+            fill.style.width = level.w;
+            fill.style.background = level.c;
+            text.textContent = level.t;
+            text.style.color = level.c;
         }
+
+        // Form submission loading state
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.classList.add('btn-loading');
+            btn.textContent = 'Creating account...';
+        });
     </script>
 </body>
 </html>

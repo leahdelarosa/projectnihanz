@@ -193,6 +193,18 @@ $last_login = isset($logins[1]) ? $logins[1]['timestamp'] : ($logins[0]['timesta
             padding: 40px;
             position: relative;
             z-index: 1;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .topbar {
@@ -366,10 +378,96 @@ $last_login = isset($logins[1]) ? $logins[1]['timestamp'] : ($logins[0]['timesta
         .badge.admin { background: rgba(99,102,241,0.15); color: #818cf8; border: 1px solid rgba(99,102,241,0.25); }
         .badge.user  { background: rgba(59,130,246,0.12); color: var(--accent); border: 1px solid rgba(59,130,246,0.2); }
 
-        @media (max-width: 900px) {
+        /* Responsive Design */
+        /* Tablet: 560px - 899px */
+        @media (max-width: 899px) and (min-width: 560px) {
             .sidebar { display: none; }
-            .main { margin-left: 0; padding: 24px; }
-            .stats { grid-template-columns: 1fr; }
+            .main { margin-left: 0; padding: 32px; }
+            
+            .stats { 
+                grid-template-columns: repeat(2, 1fr); 
+                gap: 14px;
+            }
+            
+            .cards { 
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+                gap: 16px;
+            }
+            
+            .topbar { margin-bottom: 28px; }
+            .page-title { font-size: 1.35rem; }
+        }
+
+        /* Mobile: < 560px */
+        @media (max-width: 560px) {
+            .sidebar { display: none; }
+            .main { margin-left: 0; padding: 20px 16px; }
+            
+            /* Stack stat cards vertically */
+            .stats { 
+                grid-template-columns: 1fr; 
+                gap: 12px;
+                margin-bottom: 24px;
+            }
+            
+            .stat-card { 
+                padding: 16px 18px; 
+            }
+            
+            .stat-icon { 
+                width: 38px; 
+                height: 38px; 
+            }
+            
+            .stat-icon svg { width: 16px; height: 16px; }
+            .stat-label { font-size: 0.7rem; }
+            .stat-value { font-size: 0.95rem; }
+            
+            /* Stack feature cards */
+            .cards { 
+                grid-template-columns: 1fr; 
+                gap: 14px;
+            }
+            
+            .card { 
+                padding: 22px; 
+                border-radius: 16px;
+            }
+            
+            .card-icon { 
+                width: 42px; 
+                height: 42px; 
+                margin-bottom: 14px;
+            }
+            
+            .card-icon svg { width: 18px; height: 18px; }
+            .card h3 { font-size: 0.95rem; }
+            .card p { font-size: 0.8rem; margin-bottom: 16px; }
+            
+            /* Ensure minimum touch target sizes (44x44px) */
+            .card-btn, .logout-btn { 
+                min-height: 44px;
+                padding: 12px 16px;
+                font-size: 0.85rem;
+            }
+            
+            /* Topbar adjustments */
+            .topbar { 
+                flex-direction: column; 
+                align-items: flex-start; 
+                gap: 16px;
+                margin-bottom: 24px;
+            }
+            
+            .page-title { font-size: 1.25rem; }
+            
+            .logout-btn { 
+                align-self: stretch;
+                justify-content: center;
+            }
+            
+            /* Adjust font sizes for mobile readability */
+            .badge { font-size: 0.65rem; padding: 2px 7px; }
         }
     </style>
 </head>
